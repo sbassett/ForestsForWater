@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fireshed Priority Index (FPI) Dashboard</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+          
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Controls -->
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <div class="brand">
+                    <span class="logo">💧</span>
+                    <h1>Fireshed Priority Index</h1>
+                </div>
+                <p class="subtitle">Dynamic Basin-Scale Water Security & Wildfire Risk Framework</p>
+            </header>
+            
+            <div class="controls-container">
+                <!-- Social Weighting Mode -->
+                <section class="control-section">
+                    <h2>🎯 Social Weighting Mode</h2>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="people-mode" value="ppd" checked>
+                            <span class="radio-custom"></span>
+                            <div class="radio-text">
+                                <strong>People-Per-Drop (PPD)</strong>
+                                <small>Relative water supply efficiency</small>
+                            </div>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="people-mode" value="beneficiaries">
+                            <span class="radio-custom"></span>
+                            <div class="radio-text">
+                                <strong>Total Beneficiaries</strong>
+                                <small>Absolute population served</small>
+                            </div>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="people-mode" value="none">
+                            <span class="radio-custom"></span>
+                            <div class="radio-text">
+                                <strong>None (Ecological Only)</strong>
+                                <small>Water yield and dry forest density</small>
+                            </div>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Model Aggregation Mode -->
+                <section class="control-section">
+                    <h2>🧮 Aggregation Model</h2>
+                    <div class="radio-group horizontal">
+                        <label class="radio-label">
+                            <input type="radio" name="aggregation-mode" value="linear" checked>
+                            <span class="radio-custom"></span>
+                            <div class="radio-text"><strong>Weighted Linear</strong></div>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="aggregation-mode" value="multiplicative">
+                            <span class="radio-custom"></span>
+                            <div class="radio-text"><strong>Multiplicative Joint</strong></div>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Sliders for Weights (Linear only) -->
+                <section class="control-section" id="weights-section">
+                    <div class="slider-header">
+                        <h2 id="w1-label">💧 Hydrological Weight (w1)</h2>
+                        <span class="slider-val" id="w1-val">0.50</span>
+                    </div>
+                    <input type="range" id="w1-slider" min="0" max="1" step="0.05" value="0.5">
+                    
+                    <div class="slider-header margin-top">
+                        <h2>🌿 Forest Footprint Weight (w2)</h2>
+                        <span class="slider-val" id="w2-val">0.50</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="w2-progress"></div>
+                    </div>
+                </section>
+
+                <!-- Majority Filter Checkbox -->
+                <section class="control-section">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="majority-filter">
+                        <span class="checkbox-custom"></span>
+                        <div class="checkbox-text">
+                            <strong>Filter 'Majority Dry Forest'</strong>
+                            <small>Only include basins with ≥ 50% Dry Forest cover</small>
+                        </div>
+                    </label>
+                </section>
+
+                <!-- Min Dry Forest Threshold Slider -->
+                <section class="control-section">
+                    <div class="slider-header">
+                        <h2>🚧 Min Dry Forest Threshold</h2>
+                        <span class="slider-val" id="threshold-val">10%</span>
+                    </div>
+                    <input type="range" id="threshold-slider" min="0" max="50" step="1" value="10">
+                </section>
+
+                <!-- Symbology Styles -->
+                <section class="control-section">
+                    <h2>🎨 Map Symbology</h2>
+                    <select id="symbology-select" class="custom-select">
+                        <option value="quantile" selected>Quantile Classes (Discrete)</option>
+                        <option value="continuous">Continuous Scale</option>
+                    </select>
+                </section>
+
+                <!-- Active Map Layer -->
+                <section class="control-section">
+                    <h2>🗺️ Map Visualizer Layer</h2>
+                    <select id="layer-select" class="custom-select">
+                        <option value="Priority_Score" selected>Fireshed Priority Score</option>
+                        <option value="Total_Beneficiaries">Total Beneficiaries (People)</option>
+                        <option value="Dry_Forest_Percent">Dry Forest Coverage %</option>
+                        <option value="Water_Yield_Vol">Water Yield Volume (m³)</option>
+                        <option value="People_Per_Drop">People-Per-Drop (Efficiency)</option>
+                    </select>
+                </section>
+            </div>
+
+            <!-- Summary Stats -->
+            <footer class="sidebar-footer">
+                <h3>📊 Summary Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-num" id="stat-active">2,991</span>
+                        <span class="stat-label">Basins Evaluated</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-num" id="stat-prioritized">0</span>
+                        <span class="stat-label">Prioritized (> 0)</span>
+                    </div>
+                </div>
+            </footer>
+        </aside>
+
+        <!-- Main Map Area -->
+        <main class="map-area">
+            <div id="map"></div>
+            
+            <!-- Hover Information Card -->
+            <div id="hover-card" class="hover-card">
+                <div class="hover-card-header">Hover over a fireshed boundary</div>
+                <div class="hover-card-body" style="display: none;">
+                    <h3 id="hover-name">Fireshed Name</h3>
+                    <div class="hover-meta-grid">
+                        <div class="hover-meta-item">
+                            <span class="label">Priority Score</span>
+                            <strong class="val highlight" id="hover-score">0.000</strong>
+                        </div>
+                        <div class="hover-meta-item">
+                            <span class="label">Beneficiaries</span>
+                            <strong class="val" id="hover-beneficiaries">0</strong>
+                        </div>
+                        <div class="hover-meta-item">
+                            <span class="label">Dry Forest Cover</span>
+                            <strong class="val" id="hover-forest">0.0%</strong>
+                        </div>
+                        <div class="hover-meta-item">
+                            <span class="label">Water Yield Vol</span>
+                            <strong class="val" id="hover-yield">0.0 m³</strong>
+                        </div>
+                        <div class="hover-meta-item">
+                            <span class="label">People-Per-Drop</span>
+                            <strong class="val" id="hover-ppd">0.000</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Map Legend -->
+            <div id="legend-card" class="legend-card">
+                <div class="legend-title" id="legend-title">Fireshed Priority Score</div>
+                <div class="legend-items" id="legend-items">
+                    <!-- Dynamic Items -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+            
+    <!-- Dashboard Logic script -->
+    <script src="script.js"></script>
+</body>
+</html>
