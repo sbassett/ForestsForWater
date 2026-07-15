@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Forests For Water: Scientific documentation and transparent methodology for prioritizing dry forest management to protect municipal water supplies.">
+    <title>Forests For Water: Fireshed Prioritization Model</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Hero Header -->
+    <header class="hero-section">
+        <div class="container hero-container">
+            <div class="hero-content">
+                <span class="badge">Scientific & Management Documentation</span>
+                <h1>Forests For Water</h1>
+                <p class="subtitle">Prioritizing dry forest restoration to secure municipal water supplies in the Western United States.</p>
+                <div class="hero-actions">
+                    <a href="#pipeline" class="btn btn-primary" id="btn-explore-model">Explore Methodology</a>
+                    <a href="#simulator" class="btn btn-secondary" id="btn-simulate-weights">Simulation Sandbox</a>
+                </div>
+            </div>
+            <div class="hero-illustration">
+                <img src="dashboard_mockup.png" alt="Prioritization Map Dashboard Mockup" class="mockup-img">
+            </div>
+        </div>
+    </header>
+
+    <!-- Key Metrics Panel -->
+    <section class="metrics-section">
+        <div class="container metrics-grid">
+            <div class="metric-card" id="metric-systems">
+                <div class="metric-num">11,272</div>
+                <div class="metric-label">Municipal Water Systems Delineated</div>
+            </div>
+            <div class="metric-card" id="metric-watersheds">
+                <div class="metric-num">2,408</div>
+                <div class="metric-label">True Source Watersheds Resolved</div>
+            </div>
+            <div class="metric-card" id="metric-firesheds">
+                <div class="metric-num">7,688</div>
+                <div class="metric-label">CONUS Firesheds Evaluated</div>
+            </div>
+            <div class="metric-card" id="metric-fragments">
+                <div class="metric-num">299,156</div>
+                <div class="metric-label">Spatial Overlap Fragments Intersected</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Executive Summary -->
+    <section class="section summary-section">
+        <div class="container">
+            <div class="section-title-wrap">
+                <h2>The Challenge & Solution</h2>
+                <p class="lead">Wildfire risk in dry forests threatens critical water infrastructure. This model enables decision-makers to prioritize mitigation where ecological hazards and human dependency overlap.</p>
+            </div>
+            <div class="grid col-3">
+                <div class="card summary-card text-card">
+                    <h3>👥 Downstream Demand</h3>
+                    <p>We trace municipal water intake dependency back to the headwaters. Areas that supply water to large populations, or where the "people-per-drop" efficiency ratio is highest, are weighted heavily. This ensures that forest management directly protects the water security of millions of residents.</p>
+                </div>
+                <div class="card summary-card text-card">
+                    <h3>🌲 Why Dry Forests?</h3>
+                    <p>Dry forests (ponderosa pine and mixed conifer) are our primary management target because their natural fire regime—frequent, low-intensity fires—has been disrupted by a century of suppression. This makes them highly responsive to fuels reduction, thinning, and prescribed burning. Thinning these forests reduces the risk of high-severity crown fires, which cause massive soil erosion and sedimentation in reservoirs.</p>
+                </div>
+                <div class="card summary-card text-card">
+                    <h3>🔥 Post-Fire Hydro-Hazards</h3>
+                    <p>When high-severity fires occur in dense dry forests, they bake the soil, creating a water-repellent (hydrophobic) layer. Subsequent rain events lead to rapid run-off, severe soil erosion, debris flows, and sedimentation. This can physically clog intake pipes, silt up reservoirs, and overwhelm water treatment facilities with ash, forcing shutdowns.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Pipeline Steps -->
+    <section id="pipeline" class="section pipeline-section">
+        <div class="container">
+            <div class="section-title-wrap text-center">
+                <h2>Methodology: Step-by-Step Data Lineage</h2>
+                <p class="lead">A transparent, reproducible, and cached data pipeline linking climate, hydrology, ecology, and population.</p>
+            </div>
+
+            <!-- Pipeline Navigator -->
+            <div class="pipeline-nav">
+                <button class="nav-step-btn active" data-step="1" id="nav-btn-1">
+                    <span class="step-num">Step 1</span>
+                    <span class="step-title">Raster Harmonization</span>
+                </button>
+                <button class="nav-step-btn" data-step="2" id="nav-btn-2">
+                    <span class="step-num">Step 2</span>
+                    <span class="step-title">Runoff Modeling</span>
+                </button>
+                <button class="nav-step-btn" data-step="3" id="nav-btn-3">
+                    <span class="step-num">Step 3</span>
+                    <span class="step-title">Vector Delineation</span>
+                </button>
+                <button class="nav-step-btn" data-step="4" id="nav-btn-4">
+                    <span class="step-num">Step 4</span>
+                    <span class="step-title">Prioritization Indices</span>
+                </button>
+            </div>
+
+            <!-- Pipeline Cards Content -->
+            <div class="pipeline-content-area">
+                <!-- Step 1 -->
+                <div class="pipeline-step-pane active" id="step-pane-1">
+                    <div class="grid col-3-2">
+                        <div class="pane-text">
+                            <h3>Raster Harmonization & Clipping</h3>
+                            <p>We align the spatial resolution, coordinate reference systems (CRS), and bounding extents of the primary raster datasets covering the Western United States. All rasters are resampled to a standardized 1 km² grid in the Albers Equal Area projection (EPSG:5070).</p>
+                            
+                            <h4>Input Datasets:</h4>
+                            <ul>
+                                <li><strong>PRISM Climate Normals (1991–2020)</strong>: Mean Annual Precipitation (MAP) and Reference Evapotranspiration (Eref).</li>
+                                <li><strong>Contemporary Vegetation Mask</strong>: LANDFIRE vegetation classes reclassified to identify Dry Forest ecosystems (Dry Pine, Mixed Conifer).</li>
+                            </ul>
+                        </div>
+                        <div class="pane-details">
+                            <div class="detail-box">
+                                <span class="detail-label">CRS Projection</span>
+                                <span class="detail-value">NAD83 / Conus Albers (EPSG:5070)</span>
+                            </div>
+                            <div class="detail-box">
+                                <span class="detail-label">Pixel Resolution</span>
+                                <span class="detail-value">1 km &times; 1 km (100 ha)</span>
+                            </div>
+                            <div class="detail-box">
+                                <span class="detail-label">Dry Forest Criteria</span>
+                                <span class="detail-value">Contemporary Dry Forest Indicator = 1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="pipeline-step-pane" id="step-pane-2">
+                    <div class="grid col-3-2">
+                        <div class="pane-text">
+                            <h3>Volumetric Yield Modeling</h3>
+                            <p>For each 1 km² grid cell, we compute the baseline annual water yield volume. This calculates the net physical volume of water produced by the landscape after accounting for atmospheric losses and ecological transpiration.</p>
+                            
+                            <h4>Hydrological Formulas:</h4>
+                            <div class="formula-box">
+                                <p class="equation">Net Yield (mm) = MAP &minus; Eref &middot; F</p>
+                                <p class="equation-desc">Where F represents the crop coefficient factor adjusted for forest vegetation density.</p>
+                            </div>
+                            <div class="formula-box">
+                                <p class="equation">Net Yield Volume (m³) = Net Yield (mm) &middot; Cell Area (m²) / 1000</p>
+                            </div>
+                        </div>
+                        <div class="pane-details">
+                            <div class="detail-box">
+                                <span class="detail-label">Annual Precipitation</span>
+                                <span class="detail-value">PRISM Normal MAP (1991–2020)</span>
+                            </div>
+                            <div class="detail-box">
+                                <span class="detail-label">Evaporative Demand</span>
+                                <span class="detail-value">PRISM Eref normal monthly sums</span>
+                            </div>
+                            <div class="detail-box">
+                                <span class="detail-label">Output Product</span>
+                                <span class="detail-value">Net Water Yield Volume Raster</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="pipeline-step-pane" id="step-pane-3">
+                    <div class="grid col-3-2">
+                        <div class="pane-text">
+                            <h3>Topographic Vector Delineation & Upstream Resolving</h3>
+                            <p>We trace the path of municipal water from physical intakes upstream. Using the <code>WUS_PublicWaterSources</code> geodatabase, we construct the <strong>True Source Area</strong> for each water system. Intakes and system connections are resolved using a Breadth-First Search (BFS) graph traversal.</p>
+                            <p>We then intersect these True Source Areas with the US Forest Service Fireshed Registry (polygons of roughly 100,000 acres representing fire-management scales) to create <strong>spatial overlap fragments</strong>.</p>
+                            
+                            <h4>Overlay Operations:</h4>
+                            <ul>
+                                <li>Delineate True Source Areas by merging all upstream drinking water intakes.</li>
+                                <li>Intersect Source Areas with Fireshed boundaries to get 299,156 fragments.</li>
+                                <li>Compute forest cover percentages by overlaying LANDFIRE Dry Forest vector footprints.</li>
+                            </ul>
+                        </div>
+                        <div class="pane-details">
+                            <div class="detail-box">
+                                <span class="detail-label">Dependency Resolution</span>
+                                <span class="detail-value">System Connection Graph Traversal</span>
+                            </div>
+                            <div class="detail-box">
+                                <span class="detail-label">Geometric Intersections</span>
+                                <span class="detail-value">299,156 vector overlap fragments</span>
+                            </div>
+                            <div class="detail-box">
+                                <span class="detail-label">Forest Density Delineation</span>
+                                <span class="detail-value">Dry Forest % per fragment</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="pipeline-step-pane" id="step-pane-4">
+                    <div class="grid col-3-2">
+                        <div class="pane-text">
+                            <h3>Prioritization Scoring & Aggregation</h3>
+                            <p>Finally, we aggregate the fragment metrics to the parent Fireshed scale. Each fragment represents the overlap of a Fireshed and a Source Watershed. The score combines the social importance of the water source with the density of the dry forest overlay.</p>
+                            
+                            <h4>🌲 The Ecological Hazard Component: Dry Forest Cover (Pct_DF)</h4>
+                            <p>For each fragment, we compute the percentage of its area covered by Dry Forest (<code>Pct_DF</code>). This is our indicator of wildfire risk exposure: dense dry pine and mixed-conifer forests represent the heavy fuel loads most vulnerable to severe fire and subsequent erosion.</p>
+                            
+                            <h4>👥 The Social Dependency Component: Weighting Target</h4>
+                            <p>Decision-makers choose how populations are factored in at the watershed scale:</p>
+                            <ul>
+                                <li><strong>People-Per-Drop (PPD - Relative Efficiency)</strong>:
+                                    <div class="formula-box">
+                                        <p class="equation">PPD = Population / Total_Water_Yield_Volume</p>
+                                    </div>
+                                </li>
+                                <li><strong>Total Beneficiaries (Absolute Scale)</strong>:
+                                    <div class="formula-box">
+                                        <p class="equation">Beneficiaries = Population</p>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                            <h4>🛠️ Integrating Social and Ecological Metrics</h4>
+                            <p>We combine the normalized Social Metric and Dry Forest Coverage (<code>Pct_DF</code>) into a single <code>Fragment_Score</code> using one of two formulas:</p>
+                            <ul>
+                                <li><strong>Weighted Linear Index</strong>: Allows trade-offs. A fragment can score highly if it has either extreme human dependency OR extreme forest cover.
+                                    <div class="formula-box">
+                                        <p class="equation">Score = w1 &middot; Norm(Social_Metric) + w2 &middot; Norm(Pct_DF)</p>
+                                    </div>
+                                </li>
+                                <li><strong>Multiplicative Joint Index</strong>: Requires both elements to be high (acts as an AND gate). Zeroes out if either component is missing.
+                                    <div class="formula-box">
+                                        <p class="equation">Score = Norm(Social_Metric &times; Pct_DF)</p>
+                                    </div>
+                                </li>
+                            </ul>
+                            
+                            <h4>📈 Aggregating to Firesheds</h4>
+                            <p>Since a fireshed can overlap multiple watersheds, its raw score is the sum of all its fragment scores. This raw score is normalized from 0.0 to 1.0 to produce the final <strong>Fireshed Priority Score</strong>.</p>
+                        </div>
+                        <div class="pane-details">
+                            <div class="detail-box">
+                                <span class="detail-label">Prioritization Target</span>
+                                <span class="detail-value">Firesheds (Aggregated scale)</span>
+                            </div>
+                            <div class="detail-box">
+                                <span class="detail-label">Formulas Available</span>
+                                <span class="detail-value">Weighted Linear or Multiplicative Index</span>
+                            </div>
+                            <div class="detail-box">
+                                <span class="detail-label">Zonal Statistics</span>
+                                <span class="detail-value">Fireshed physical water yield (raster sum)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Simulation Sandbox -->
+    <section id="simulator" class="section simulator-section">
+        <div class="container">
+            <div class="section-title-wrap text-center">
+                <h2>Calibration Simulator</h2>
+                <p class="lead">Adjust the model weights and social weighting target to see how the prioritization formulas behave in real-time. Verify how different policy choices shift the ranks of sample firesheds.</p>
+            </div>
+
+            <div class="grid col-3-2 simulator-layout">
+                <!-- Sliders Panel -->
+                <div class="card simulator-card">
+                    <h3>⚙️ Calibration Settings</h3>
+                    
+                    <div class="control-group">
+                        <label for="social-metric-select">Social Weighting Target / Ecological Mode:</label>
+                        <select id="social-metric-select" class="form-control">
+                            <option value="ppd">People-Per-Drop (PPD - Hydrological Efficiency)</option>
+                            <option value="beneficiaries">Total Beneficiaries (Absolute Population Impact)</option>
+                            <option value="none">None (Ecological & Hydrological Runoff Only)</option>
+                        </select>
+                        <span class="help-text">Choose whether the model values water yield efficiency (PPD), absolute population, or excludes human weighting entirely.</span>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="formula-select">Priority Score Formula:</label>
+                        <select id="formula-select" class="form-control">
+                            <option value="linear">Weighted Linear Index</option>
+                            <option value="multiplicative">Multiplicative Joint Index</option>
+                        </select>
+                        <span class="help-text">Linear uses sum of normalized scores; Multiplicative joint-multiplies variables.</span>
+                    </div>
+
+                    <div class="control-group" id="weights-sliders-container">
+                        <div class="slider-header">
+                            <label for="w1-slider" id="w1-label">💧 Hydro-Social Weight (w1):</label>
+                            <span class="slider-val" id="w1-value">0.50</span>
+                        </div>
+                        <input type="range" id="w1-slider" min="0" max="1" step="0.05" value="0.5" class="slider-input">
+                        
+                        <div class="slider-header margin-top">
+                            <label id="w2-label">🌿 Forest Footprint Weight (w2):</label>
+                            <span class="slider-val" id="w2-value">0.50</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" id="w2-progress-fill" style="width: 50%;"></div>
+                        </div>
+                        <span class="help-text">Weights must sum to 1.0. Forest weight is automatically calculated as (1 - w1).</span>
+                    </div>
+                </div>
+
+                <!-- Simulation Output -->
+                <div class="card simulator-card output-card">
+                    <h3>📊 Live Scenario Output</h3>
+                    
+                    <div class="live-formula-box">
+                        <div class="formula-title">Active Mathematical Formula:</div>
+                        <div class="formula-expr" id="formula-expression">
+                            Score = 0.50 &middot; Norm(Social_Metric) + 0.50 &middot; Norm(Pct_DF)
+                        </div>
+                    </div>
+
+                    <h4>Simulated Top Fireshed Profiles:</h4>
+                    <div class="fireshed-results-list" id="simulated-results">
+                        <!-- Simulated Card 1 -->
+                        <div class="fireshed-result-card" id="fs-card-1">
+                            <div class="fs-header">
+                                <span class="fs-name">Cascade Headwaters (ID: 3042)</span>
+                                <span class="fs-score" id="fs-score-1">Score: 0.850</span>
+                            </div>
+                            <div class="fs-metrics">
+                                <span>👥 Beneficiaries: 1.2M</span>
+                                <span>💧 Water Yield: 850M m³</span>
+                                <span>🌲 Dry Forest Cover: 82%</span>
+                            </div>
+                        </div>
+                        <!-- Simulated Card 2 -->
+                        <div class="fireshed-result-card" id="fs-card-2">
+                            <div class="fs-header">
+                                <span class="fs-name">Olympic Rainfall Zone (ID: 1045)</span>
+                                <span class="fs-score" id="fs-score-2">Score: 0.420</span>
+                            </div>
+                            <div class="fs-metrics">
+                                <span>👥 Beneficiaries: 50k</span>
+                                <span>💧 Water Yield: 2.1B m³</span>
+                                <span>🌲 Dry Forest Cover: 24%</span>
+                            </div>
+                        </div>
+                        <!-- Simulated Card 3 -->
+                        <div class="fireshed-result-card" id="fs-card-3">
+                            <div class="fs-header">
+                                <span class="fs-name">Front Range Interface (ID: 5081)</span>
+                                <span class="fs-score" id="fs-score-3">Score: 0.730</span>
+                            </div>
+                            <div class="fs-metrics">
+                                <span>👥 Beneficiaries: 2.4M</span>
+                                <span>💧 Water Yield: 110M m³</span>
+                                <span>🌲 Dry Forest Cover: 65%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dataset Citation and Resources -->
+    <section class="section citation-section">
+        <div class="container">
+            <div class="section-title-wrap text-center">
+                <h2>Transparent Data Sources</h2>
+                <p class="lead">All datasets used in this model are public, peer-reviewed, and standard across federal and state agencies.</p>
+            </div>
+            
+            <div class="citation-grid">
+                <div class="citation-card" id="citation-prism">
+                    <span class="source-tag">Climate</span>
+                    <h4>PRISM Climate Group</h4>
+                    <p>Mean Annual Precipitation (MAP) and monthly reference evapotranspiration (Eref) normals (1991–2020) at 800m resolution. Oregon State University.</p>
+                    <a href="https://prism.oregonstate.edu/" target="_blank" class="source-link" id="link-prism">Access Source</a>
+                </div>
+                <div class="citation-card" id="citation-landfire">
+                    <span class="source-tag">Ecology</span>
+                    <h4>LANDFIRE Program</h4>
+                    <p>Existing Vegetation Type (EVT) contemporary dataset. Reclassified to separate Dry Forest communities prone to wildfire hazard.</p>
+                    <a href="https://landfire.gov/" target="_blank" class="source-link" id="link-landfire">Access Source</a>
+                </div>
+                <div class="citation-card" id="citation-firesheds">
+                    <span class="source-tag">Wildfire Scale</span>
+                    <h4>USFS Fireshed Registry</h4>
+                    <p>US Forest Service Fireshed Registry (2020 version, RDS-2020-0054-4), representing ~100,000-acre management zones to map source fire threat.</p>
+                    <a href="https://www.fs.usda.gov/rds/archive/catalog/RDS-2020-0054-4" target="_blank" class="source-link" id="link-firesheds">Access Source</a>
+                </div>
+                <div class="citation-card" id="citation-wus">
+                    <span class="source-tag">Drinking Water</span>
+                    <h4>WUS Public Water Sources</h4>
+                    <p>Western US Public Water Sources dataset (Release v2.0), resolving public water intake points, system interconnections, and populations served.</p>
+                    <a href="https://www.hydroshare.org/" target="_blank" class="source-link" id="link-wus">Access Source</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container footer-content text-center">
+            <p><strong>Forests For Water</strong> Prioritization Model. Built for scientists, managers, and watershed coalitions.</p>
+            <p class="copyright">&copy; 2026 Forests For Water. Open source under the MIT License.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
