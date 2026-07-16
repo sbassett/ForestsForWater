@@ -1,4 +1,4 @@
-/* script.js - Dynamic FPI Scoring & Mapping Engine */
+/* script.js - Dynamic FPI Scoring & Mapping Engine (Light Basemap Edition) */
 
 document.addEventListener("DOMContentLoaded", () => {
     // Map State Variables
@@ -40,8 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
             maxZoom: 10
         }).setView([40.0, -114.0], 5);
         
-        // CartoDB Dark Matter Basemap (Aesthetic & High Contrast)
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        // CartoDB Positron Basemap (Light Gray, Minimalist, highly legible)
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             subdomains: 'abcd',
             maxZoom: 20
@@ -58,13 +58,33 @@ document.addEventListener("DOMContentLoaded", () => {
         return arr[lower] * (1 - weight) + arr[upper] * weight;
     }
 
-    // Color Ramps for Quantiles
+    // Helper: Interpolate between two hex colors
+    function interpolateColor(color1, color2, factor) {
+        const r1 = parseInt(color1.substring(1, 3), 16);
+        const g1 = parseInt(color1.substring(3, 5), 16);
+        const b1 = parseInt(color1.substring(5, 7), 16);
+        
+        const r2 = parseInt(color2.substring(1, 3), 16);
+        const g2 = parseInt(color2.substring(3, 5), 16);
+        const b2 = parseInt(color2.substring(5, 7), 16);
+        
+        const r = Math.round(r1 + factor * (r2 - r1));
+        const g = Math.round(g1 + factor * (g2 - g1));
+        const b = Math.round(b1 + factor * (b2 - b1));
+        
+        return '#' + [r, g, b].map(x => {
+            const hex = x.toString(16);
+            return hex.length === 1 ? '0' + hex : hex;
+        }).join('');
+    }
+
+    // Standard ColorBrewer Ramps (Matches python dashboard)
     const COLOR_RAMPS = {
-        'Priority_Score': ['#fee5d9', '#fcae91', '#fb6a4a', '#de2d26', '#a50f15'],
-        'Total_Beneficiaries': ['#eff3ff', '#bdd7e7', '#6baed6', '#3182bd', '#08519c'],
-        'Dry_Forest_Percent': ['#e5f5e0', '#a1d99b', '#74c476', '#31a354', '#006d2c'],
-        'Water_Yield_Vol': ['#e0f7fa', '#80deea', '#26c6da', '#00acc1', '#006064'],
-        'People_Per_Drop': ['#f3e5f5', '#e1bee7', '#ba68c8', '#8e24aa', '#4a148c']
+        'Priority_Score': ['#4575b4', '#91bfdb', '#ffffbf', '#fc8d59', '#d73027'],      // RdYlBu
+        'Total_Beneficiaries': ['#eff3ff', '#bdd7e7', '#6baed6', '#3182bd', '#08519c'], // Blues
+        'Dry_Forest_Percent': ['#edf8e9', '#bae4b3', '#74c476', '#31a354', '#006d2c'],  // Greens
+        'Water_Yield_Vol': ['#f1eef6', '#bdc9e1', '#74a9cf', '#2b8cbe', '#045a8d'],     // PuBu
+        'People_Per_Drop': ['#edf8fb', '#b3cde3', '#8c96c6', '#88419d', '#810f7c']      // BuPu
     };
 
     // Human-readable labels for legends
@@ -196,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const val = parseFloat(feature.properties[layer]) || 0.0;
         const styleMode = symbologySelect.value;
         
-        let color = '#eeeeee';
+        let color = '#eceff1'; // Very light grey background for unprioritized/zero values
         
         if (val > 0.0) {
             if (styleMode === 'quantile') {
@@ -206,9 +226,9 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
         
-        const opacity = val > 0.0 ? 0.65 : 0.15;
-        const weight = val > 0.0 ? 0.6 : 0.3;
-        const borderColor = val > 0.0 ? '#1e2538' : '#777777';
+        const opacity = val > 0.0 ? 0.72 : 0.04;
+        const weight = val > 0.0 ? 0.8 : 0.4;
+        const borderColor = val > 0.0 ? '#ffffff' : '#d2d2d2';
         
         return {
             fillColor: color,
@@ -219,36 +239,32 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // Helper: Get color from continuous HSL scaling
+    // Get color from continuous ColorBrewer scale interpolation
     function getContinuousColor(val, layer) {
-        // Collect all non-zero values for current layer to scale bounds
         const vals = geoJsonData.features.map(f => f.properties[layer]).filter(v => v > 0.0);
-        if (vals.length === 0) return '#eeeeee';
+        if (vals.length === 0) return '#eceff1';
         
         const minVal = Math.min(...vals);
         const maxVal = Math.max(...vals);
         const norm = (maxVal > minVal) ? (val - minVal) / (maxVal - minVal) : 0.0;
         
+        // Interpolate between the start and end of standard ColorBrewer ramps
         if (layer === 'Priority_Score') {
-            // HSL: Red (0) to Yellow (50)
-            const h = norm * 50;
-            return `hsl(${h}, 90%, 45%)`;
+            if (norm < 0.5) {
+                return interpolateColor('#4575b4', '#ffffbf', norm * 2);
+            } else {
+                return interpolateColor('#ffffbf', '#d73027', (norm - 0.5) * 2);
+            }
         } else if (layer === 'Total_Beneficiaries') {
-            // Blue
-            return `hsl(210, 85%, ${80 - norm * 40}%)`;
+            return interpolateColor('#eff3ff', '#08519c', norm); // Blues
         } else if (layer === 'Dry_Forest_Percent') {
-            // Green
-            return `hsl(140, 80%, ${75 - norm * 35}%)`;
+            return interpolateColor('#edf8e9', '#006d2c', norm); // Greens
         } else if (layer === 'Water_Yield_Vol') {
-            // Cyan-Blue
-            const h = 180 + norm * 40;
-            return `hsl(${h}, 85%, ${75 - norm * 30}%)`;
+            return interpolateColor('#f1eef6', '#045a8d', norm); // PuBu
         } else if (layer === 'People_Per_Drop') {
-            // Purple-Magenta
-            const h = 265 + norm * 50;
-            return `hsl(${h}, 85%, ${70 - norm * 30}%)`;
+            return interpolateColor('#edf8fb', '#810f7c', norm); // BuPu
         }
-        return '#eeeeee';
+        return '#eceff1';
     }
 
     // Cache percentiles list to optimize style calls
@@ -275,7 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function getQuantileColor(val, layer) {
         const p = activePercentiles;
-        if (!p.vals || p.vals.length === 0) return '#eeeeee';
+        if (!p.vals || p.vals.length === 0) return '#eceff1';
         
         let colorClass = 0;
         if (val >= p.p90) colorClass = 4;
@@ -331,18 +347,18 @@ document.addEventListener("DOMContentLoaded", () => {
             const minStr = formatFn(vals[0]);
             const maxStr = formatFn(vals[vals.length - 1]);
             
-            // Build visual color ramp
+            // Build visual color ramp matching ColorBrewer bounds
             let gradientStr = '';
             if (layer === 'Priority_Score') {
-                gradientStr = 'linear-gradient(to right, hsl(0, 90%, 45%), hsl(50, 90%, 60%))';
+                gradientStr = 'linear-gradient(to right, #4575b4, #ffffbf, #d73027)';
             } else if (layer === 'Total_Beneficiaries') {
-                gradientStr = 'linear-gradient(to right, hsl(210, 85%, 80%), hsl(210, 85%, 40%))';
+                gradientStr = 'linear-gradient(to right, #eff3ff, #08519c)';
             } else if (layer === 'Dry_Forest_Percent') {
-                gradientStr = 'linear-gradient(to right, hsl(140, 80%, 75%), hsl(140, 80%, 40%))';
+                gradientStr = 'linear-gradient(to right, #edf8e9, #006d2c)';
             } else if (layer === 'Water_Yield_Vol') {
-                gradientStr = 'linear-gradient(to right, hsl(180, 85%, 75%), hsl(220, 85%, 45%))';
+                gradientStr = 'linear-gradient(to right, #f1eef6, #045a8d)';
             } else if (layer === 'People_Per_Drop') {
-                gradientStr = 'linear-gradient(to right, hsl(265, 85%, 70%), hsl(315, 85%, 40%))';
+                gradientStr = 'linear-gradient(to right, #edf8fb, #810f7c)';
             }
             
             legendItems.innerHTML = `
@@ -389,11 +405,11 @@ document.addEventListener("DOMContentLoaded", () => {
             mouseover: (e) => {
                 const l = layerSelect.value;
                 
-                // Highlight polygon border
+                // Highlight polygon border (Cyan border for high contrast)
                 layer.setStyle({
                     weight: 2.0,
-                    color: '#00ffcc',
-                    fillOpacity: 0.8
+                    color: '#00bcd4',
+                    fillOpacity: 0.85
                 });
                 
                 // Bring to front
