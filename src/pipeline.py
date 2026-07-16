@@ -347,7 +347,9 @@ def step_3_vector_intersection(
     
     # Area-weighted proportional population served (beneficiaries) for each fireshed
     print("Calculating area-weighted proportional beneficiaries for each fireshed...")
-    watersheds_gdf['ws_area_m2'] = watersheds_gdf.geometry.area
+    
+    # Calculate unsimplified fireshed area to prevent simplification distortion in ratio
+    firesheds_filtered['fireshed_area_m2'] = firesheds_filtered.geometry.area
     
     # Simplify geometries to speed up overlay
     print("Simplifying geometries for spatial overlay (tolerance = 100m)...")
@@ -357,8 +359,8 @@ def step_3_vector_intersection(
     intersections = gpd.overlay(firesheds_filtered, watersheds_gdf, how='intersection')
     intersections['intersect_area_m2'] = intersections.geometry.area
     intersections['prop_population'] = np.where(
-        intersections['ws_area_m2'] > 0.0,
-        (intersections['intersect_area_m2'] / intersections['ws_area_m2']) * intersections['population_served'],
+        intersections['fireshed_area_m2'] > 0.0,
+        (intersections['intersect_area_m2'] / intersections['fireshed_area_m2']) * intersections['population_served'],
         0.0
     )
     
